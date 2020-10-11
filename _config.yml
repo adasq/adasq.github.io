@@ -7,8 +7,8 @@ baseurl: ""
 author:
   name: Adam Plocieniak
   email: adasq3@gmail.com
-  image: "https://avatars2.githubusercontent.com/u/5637734?s=460&u=792da25f623944719113a2a08e5bc6de7640b572&v=4"
-  bio: Hi, I'm Adam.
+  image: "https://avatars2.githubusercontent.com/u/5637734?s=50&u=792da25f623944719113a2a08e5bc6de7640b572&v=4"
+  bio: Hi, I'm Adam. <br> Writing about JavaScript / React.
   github: "adasq"
 
 plugins:
