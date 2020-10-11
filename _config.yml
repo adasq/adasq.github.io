@@ -1,0 +1,29 @@
+title: Adam Płócieniak Blog
+markdown: kramdown
+url: ""
+baseurl: "/blog"
+
+# for atom feed
+author:
+  name: Adam Plocieniak
+  email: adasq3@gmail.com
+  image: "https://avatars2.githubusercontent.com/u/5637734?s=460&u=792da25f623944719113a2a08e5bc6de7640b572&v=4"
+  bio: Hi, I'm Adam.
+  github: "adasq"
+
+plugins:
+  - jemoji
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "post"
+  - scope:
+      path: "_posts"
+    values:
+      layout: "post"
+      permalink: /posts/:categories/:year/:month/:day/:title/
