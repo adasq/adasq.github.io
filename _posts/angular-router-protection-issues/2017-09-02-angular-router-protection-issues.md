@@ -10,8 +10,6 @@ image: "/assets/img/angular-router-protection-issues/background.jpeg"
 
 Angular router is not perfect, yet. At least latest stable version, `4.3.6` which is a scope of this article. You will notice it while struggling to prototype more sophisticated routing architecture. Nested structure full of `resolve` and `canActivation` guards is a must sometimes, especially when your application grows. In this article, I will try shed light on some the difficulties I had to face lately while working with Angular Router.
 
-![fence](/assets/img/angular-router-protection-issues/background.jpeg)
-
 <figure>
 <img src="{{ page.image }}" alt="fence">
 <figcaption>Fig 1. Fence</figcaption>
