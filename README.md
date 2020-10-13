@@ -1,29 +1,59 @@
-# Geekyll Starter Blog
-A minimal Jekyll theme for blogging developed by Sharad Raj Singh Maurya
+# Klisé
 
-## [Live Demo](https://sharadcodes.github.io/geekyll-starter-blog/)
+Klisé is minimalist Jekyll theme for running a personal site and blog running on Jekyll.<br>
+For demo <a href="https://klise.now.sh" target="_blank" rel="noopener">klise.now.sh</a>
 
 ## Features
 
-* Dark Mode
-* Minimal CSS
-* Syntax Highlighting
-* Every Image can be clicked to open lightbox
+- [x] Light & Dark Mode support :waxing_crescent_moon:
+- [x] Customizable (using `.scss`)
+- [x] Responsive (desktop, tab and mobile)
+- [x] Mobile First Design
+- [x] SEO Optimized
+- [x] Images of post Organized ([`jekyll-postfiles`](https://github.com/nhoizey/jekyll-postfiles))
+- [x] Generate Sitemap ([`jekyll-sitemap`](https://github.com/jekyll/jekyll-sitemap))
+- [x] RSS Feed ([`jekyll-feed`](https://github.com/jekyll/jekyll-feed))
+- [x] Syntax Highlighter ([`rouge`](https://github.com/rouge-ruby/rouge))
+- [x] Next & Previous Post
+- [x] Comment layout, enable in frontmatter if you wish
+- [x] Google analytics
+- [x] HTML Minify ([`jekyll-compress-html`](https://github.com/penibelst/jekyll-compress-html))
+- [x] W3C **Validated**
+- [x] Lighthouse and PageSpeed **Passed**
 
-## How to install
+![Lighthouse Result](./lighthouse.png)
 
-1. Download or clone the repo
-   `git clone https://github.com/sharadcodes/geekyll-starter-blog.git`
-2. Enter the folder
-   `cd geekyll-starter-blog`
-3. Run
-   `bundle install`
-4. Start Jekyll server
-   `bundle exec jekyll serve`
-5. Access via
-   * localhost or according to your pc configurations.
-6. Change the `_config.yml` file according to you.
-7. Upload the files on your repository and :sunglasses: enjoy.
+## Backlogs
 
-## Screenshot 
-![snap](assets/img/snap.png)
+- [ ] Intergrated with PhotoSwipe.
+- [ ] Add schema.org meta information.
+- [ ] Transform class selector to BEM metodology.
+
+## Installation
+
+Run local server:
+
+```bash
+$ git clone https://github.com/piharpi/jekyll-klise.git
+$ cd jekyll-klise
+$ bundle install
+$ bundle exec jekyll serve
+```
+
+Navigate to `localhost:4000`. You're Welcome, Fork and be Stargazer.
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/piharpi/jekyll-klise) [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/piharpi/jekyll-klise)
+
+## Limitation
+
+- Since [`jekyll-postfiles`](https://github.com/nhoizey/jekyll-postfiles#compatibility) plugin isn't supported by github pages, this cause will make your site problems, path broken or post images won't show up, you can host alternatively using likes [netlify.com](https://netlify.com), [vercel.com](https://vercel.com) or [surge.sh](https://surge.sh) services, which support 3rd party.
+
+## Contributing
+
+If you see any typos or formatting errors in a post, or want to helping reduce backlogs or any other issue that needs to be addressed, please do not hesitate to open a pull request and fix it!, please read [contributing](./CONTRIBUTING.md) before PR.
+
+Yeaaa feel free to open a pull request.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).

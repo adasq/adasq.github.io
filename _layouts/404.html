@@ -6,7 +6,6 @@ layout: compress
 <html lang="{{ page.lang | default: site.lang | default: " en " }}">
 
 {% include header.html %}
-
 <body data-theme="{{ site.mode }}" class="notransition">
 
   <script>
@@ -30,14 +29,18 @@ layout: compress
 
   {% include navbar.html %}
   <div class="wrapper">
-    <header class="header">
-      <h1 class="header-title center" itemprop="headline">{{ page.title | escape }}.</h1>
-    </header>
-    <main class="page-content" aria-label="Content">
-      {% include anchor_headings.html html=content anchorClass="anchor-head" beforeHeading=true h_min=4 h_max=4 %}
-    </main>
+    <main aria-label="Content">
+      <div class="not-found">
+        <div class="container">
+          <div class="title">404</div>
+          <p class="phrase">😕 Hmm... Seems you lost from my journey.</p>
+          <a class="solution" href="{{ site.url }}">back home</a>
+        </div>
+      </div>
+    </main>  
     {% include footer.html %}
   </div>
+    
 </body>
 
 </html>
