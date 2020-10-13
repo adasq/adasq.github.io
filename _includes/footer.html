@@ -1,14 +1,39 @@
-<footer>
-  <p>
-    <a href="https://github.com/adasq">github</a> •
-    <a href="https://stackoverflow.com/users/1757378/adam-p%c5%82%c3%b3cieniak">stack overflow</a> •
-    <a href="https://adasq.github.io/feed.xml">rss</a>
-    
-    <br />
-    &copy; {{ "now" | date: "%Y" }}
-  </p>
+<footer class="footer">
+  <!-- <a class="footer_item" href="/thanks">ack.</a> -->
+  <a class="footer_item" href="https://github.com/adasq">github</a>
+  <a class="footer_item" href="https://stackoverflow.com/users/1757378/adam-p%c5%82%c3%b3cieniak">stack overflow</a>
+  <a class="footer_item" href="/feed.xml">rss</a>
+  <br>
+  <span class="footer_item">&copy; {{ site.time | date: "%Y" }}</span>
+  <small class="footer_copyright">
+    <!-- <a
+      href="https://github.com/piharpi/jekyll-klise"
+      target="_blank"
+      rel="noreferrer noopener"
+      >klisé</a
+    >
+    theme on
+    <a href="https://jekyllrb.com" target="_blank" rel="noreferrer noopener"
+      >jekyll</a
+    >
+  </small> -->
 </footer>
-<script src="{{site.baseurl}}/assets/js/lbox.js"></script>
-<script>
-  dload()
-</script>
+<script src="/assets/js/main.js" defer="defer"></script>
+
+{%- if page.google_analytics -%}
+  <script src="/assets/js/galite.js"></script>
+  <script>
+    var galite = galite || {};
+    galite.UA = "{{ site.google_analytics }}";
+  </script>
+{%- endif -%}
+{%- if page.url == '/archive/' -%}
+  <script src="/assets/js/search.min.js"></script>
+  <script>
+    var sjs = SimpleJekyllSearch({
+      searchInput: document.getElementById('search-input'),
+      resultsContainer: document.getElementById('search-results'),
+      json: '/assets/search.json',
+    });
+  </script>
+{%- endif -%}

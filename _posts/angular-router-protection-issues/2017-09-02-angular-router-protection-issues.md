@@ -1,13 +1,19 @@
 ---
-layout: post
 title: Angular Router Protection Issues
-date: 2017-09-02 16:00:00
+date: 2017-09-02 16:00:00 +07:00
+modified: 2017-09-02 16:00:00 +07:00
+tags: [javascript, angular]
+description: Angular router is not perfect, yet. At least latest stable version, `4.3.6` which is a scope of this article.
+image: "/angular-router-protection-issues/background.jpeg"
 ---
 
 
 Angular router is not perfect, yet. At least latest stable version, `4.3.6` which is a scope of this article. You will notice it while struggling to prototype more sophisticated routing architecture. Nested structure full of `resolve` and `canActivation` guards is a must sometimes, especially when your application grows. In this article, I will try shed light on some the difficulties I had to face lately while working with Angular Router.
 
-![fence](/assets/img/angular-router-protection-issues/background.jpeg)
+<figure>
+<img src="{{ page.image }}" alt="fence">
+<figcaption>Fig 1. Fence</figcaption>
+</figure>
 
 But for now, let’s start with some basic stuff. Imagine we have an information page with two car brands: `tesla` and `arrinera`. Routing might look like:
 
