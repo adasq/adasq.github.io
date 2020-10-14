@@ -2,23 +2,28 @@
 title: Scheduling in React 16.x
 date: 2020-06-24 16:00:00 +07:00
 tags: [javascript, react, react fiber]
-description: ....
+description: How React Scheduler Works? What is the history of scheduling in React?
 image: "/assets/img/scheduling-in-react-16-x/background.jpeg"
 ---
 
 # What is scheduler?
 
+<figure>
+<img src="/assets/img/scheduling-in-react-16-x/background.jpeg" alt="fence">
+<figcaption>Fig 1. Fence</figcaption>
+</figure>
+
 Let’s start with some theory.
 
 JavaScript is a single-threaded language. This means we have one call stack which can perform one piece of code at the time. Among executing your code, the browser needs to perform a different kind of work. This includes:
 
-- managing events (user clicks handlers, _setTimeout_ callbacks, etc.)
+- managing events (user clicks handlers, `setTimeout` callbacks, etc.)
 - layout calculations (building DOM / CSSOM) and
 - repaints (based on the layout calculations)
 
-Let’s focus on the last one. Within one second, browsers usually repaint 60 times, which means there is a single repaint every 16.6ms (more or less, depending on the environment).
+Let’s focus on the last one. Within one second, browsers usually repaint 60 times, which means there is a single repaint every 16.6 ms (more or less, depending on the environment).
 
-When you run a piece of synchronous code for about one second, you will accidentally drop ~60 frames which introduces delays, hits UX, and makes your app unresponsive.
+When you run a piece of synchronous code for about one second, you will accidentally drop ~60 frames which introduce delays, hits UX, and makes your app unresponsive.
 
 So, the primary objective of the scheduler is to balance between all the activities being performed within the browser, not starve any of them as well as keeps your app repaint-aware.
 
@@ -30,7 +35,7 @@ And web frameworks do so. There is no exception for React as well (at least, Rea
 
 # Trying to implement a simple scheduler
 
-I will explain how it is managed by React, but, to understand the underlying problem, let’s write some simple piece of code…
+I will explain how it is managed by React, but, to understand the underlying problem, let’s write some simple piece of code...
 
 Let’s simulate a heavy browser app:
 
@@ -46,39 +51,43 @@ It forces the browser to do a repaint (caused by DOM manipulations being made ea
 setInterval(() => {
     document.body.appendChild(document.createTextNode('hi'))
 }, 3)
+
 render()
+
 function render() {
     for (let i = 0; i < 20; i++) {
         performUnitOfWork()
     }
 }
+
 function performUnitOfWork() {
     sleep(5)
 }
+
 function sleep(milliseconds) {
     // sleep for given {milliseconds} period (synchronous)
 }
 ```
 
-What is the impact of our browser rendering mechanism? Well, _render_ is synchronous, so it freezes browser for 100ms (20 * 5ms = 100ms). No repaint can be made within the time. User input events callbacks neither. Let’s take a look into Chrome’s "Performance tool" output for a given code:
+What is the impact of our browser rendering mechanism? Well, `render` is synchronous, so it freezes browser for 100ms (20 * 5ms = 100ms). No repaint can be made within the time. User input event callbacks neither. Let’s take a look into Chrome’s "Performance tool" output for a given code:
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/performance-1.png" alt="fence">
-<figcaption>Fig 2. Performance listing (ordinary implementation)</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/performance-1.png" alt="Performance listing">
+<figcaption>Fig 2. Performance listing (blocking thread with sleep function)</figcaption>
 </figure>
 
 In the example, we drop frames for more than 100ms (see vertical dotted lines, they show you when the frame ends). As mentioned earlier — the browser does a repaint each ~16.6 ms (60 frames per second). In this case, repaints are delayed which freezes any animation performing at the time. User input handlers are delayed as well. This is not what we want, right?
 
-Now, let’s assume the provided _render_ function is a React 15.x implementation of render mechanism. During the process, React tracks changes, calls our life-cycle methods, compares props, etc. It is a time-consuming process that might take a long time to compute, especially in heavy apps.
+Now, let’s assume the provided `render` function is a React 15.x implementation of render mechanism. During the process, React tracks changes, calls our life-cycle methods, compares props, etc. It is a time-consuming process that might take a long time to compute, especially in heavy apps.
 
-Does the React 15.x have a scheduler mechanism at all? Nope, it does not, so there is no difference between our synchronous _render_ function and React 15.x _render_ implementation.
+Does the React 15.x have a scheduler mechanism at all? Nope, it does not, so there is no difference between our synchronous `render` function and React 15.x `render` implementation. Here is [an example React 15.x application](https://claudiopro.github.io/react-fiber-vs-stack-demo/stack.html) , which do a lot of computation, without scheduler implementation:
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/react-stack.png" alt="fence">
-<figcaption>Fig 3. App structure</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/react-stack.png" alt="React 15.x heavy computation app">
+<figcaption>Fig 3. React 15.x heavy computation app</figcaption>
 </figure>
 
-See how it works [here](https://claudiopro.github.io/react-fiber-vs-stack-demo/stack.html). Quiet laggy, right? Let’s go back to our example… How can we improve this synchronous-based rendering mechanism? How about adding _setTimeout_?
+ Quiet laggy, right? Let’s go back to our example... How can we improve this synchronous-based rendering mechanism? How about adding `setTimeout`?
 
 ```js
 ...
@@ -92,13 +101,13 @@ function render() {
 What are the results?
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/performance-2.png" alt="fence">
+<img src="/assets/img/scheduling-in-react-16-x/performance-2.png" alt="Performance listing">
 <figcaption>Fig 4. Performance listing (with setTimeout)</figcaption>
 </figure>
 
 Yep, way better, our frames are no longer delayed. Our `performUnitOfWork` function is being handled separately, on each frame. Repaints are being made regularly — with no frame delay.
 
-So, is it the way the scheduling problem is being solved for React 16.x apps? Not really. Among entire internal engine rewrite (so-called React Fiber) React team has introduced a dedicated module ("React Scheduler") to address scheduling issues. How it works? I will explain it soon, but firstly — we need to introduce... [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API).
+So, is it the way the scheduling problem is being solved for React 16.x apps? Not really. Among entire internal engine rewrite (so-called React Fiber) React team has introduced a dedicated module - "React Scheduler" - to address scheduling issues. How it works? I will explain it soon, but firs t— we need to introduce... [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API).
 
 # MessageChannel-based scheduling
 
@@ -138,36 +147,41 @@ How? By the so-called "messages loop" mechanism. Now, let me replace the previou
 setInterval(() => {
     document.body.appendChild(document.createTextNode('hi'))
 }, 3)
+
 const channel = new MessageChannel()
+
 render()
+
 function render() {
     channel.port1.onmessage = onMessageReceived
     channel.port2.postMessage(null)
 }
+
 function onMessageReceived(event) {
     performUnitOfWork()
     channel.port2.postMessage(null)
 }
+
 function performUnitOfWork() {
     sleep(5)
 }
 ```
 
-Our render function was updated to take advantage of MessageChannel API. We just created the "message loop". Sending a message on `port2` (inside `render` function) forces `onmessage` (which is `onMessageReceived`) to be called, which do some calculations (`performUnitOfWork`). Then once again it forces sending a message on port2, which eventually... yep... you see the pattern, right? That is how the message loop is created.
+Our render function was updated to take advantage of MessageChannel API. We just created the "message loop". Sending a message on `port2` (inside `render` function) forces `onmessage` (which is `onMessageReceived`) to be called, which do some calculations (`performUnitOfWork`). Then once again it forces sending a message on `port2`, which eventually... yep... you see the pattern, right? That is how the message loop is created.
 
 Now let’s look at our performance profile:
 
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/performance-3.png" alt="fence">
-<figcaption>Fig 4. Performance listing (with message-loop)</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/performance-3.png" alt="Performance listing">
+<figcaption>Fig 5. Performance listing (with message-loop)</figcaption>
 </figure>
 
-Repaints are being made each 14ms / 19ms. During the single frame, we can see `performUnitOfWork` is executed even 3 times which is better than _setTimeout_ approach. What is more, in the _setTimeout_ solution there were lots more empty spaces between "execution bars" where the browser does nothing. It’s not the case in the message loop.
+Repaints are being made each 14ms / 19ms. During the single frame, we can see `performUnitOfWork` is executed even 3 times which is better than `setTimeout` approach. What is more, in the `setTimeout` solution there were lots more empty spaces between "execution bars" where the browser does nothing. It’s not the case in the message loop.
 
 # Scheduling in React 16.x
 
-And here comes the fun part. I just described to you how does the most recent implementation of React Scheduler works. It uses the MessageGlobal API to achieve their in-browser scheduling goals. This approach is even better comparing to the _setTimeout_ implementation, as it is eventually able to perform even more work within the frame.
+And here comes the fun part. I just described to you how does the most recent implementation of React Scheduler works. It uses the MessageGlobal API to achieve their in-browser scheduling goals. This approach is even better comparing to the `setTimeout` implementation, as it is eventually able to perform even more work within the frame.
 
 Now, this approach requires splitting a work into smaller chunks. Our example implementation of render function performs computation (`performUnitOfWork`) for about 5ms. And there is no difference for React implementation — it also splits work into smaller chunks to be executed within 5ms.
 
@@ -176,8 +190,8 @@ Why do we want to break our execution into smaller chunks? To let the main threa
 Consider this piece of React [code](https://github.com/facebook/react/blob/v16.13.1/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1467-L1472):
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/work-loop-concurrent.png" alt="fence">
-<figcaption>Fig 5. React's workLoopConcurrent function</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/work-loop-concurrent.png" alt="workLoopConcurrent implementation">
+<figcaption>Fig 6. React's workLoopConcurrent function</figcaption>
 </figure>
 
 
@@ -197,26 +211,26 @@ Here comes the `shouldYield` function which is a part of a "Scheduler" module. I
 What is [an implementation of shouldYield](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L164-L166)?
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/should-yield-to-host.png" alt="fence">
-<figcaption>Fig 5. React's shouldYieldToHost function</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/should-yield-to-host.png" alt="shouldYieldToHost function">
+<figcaption>Fig 7. React's shouldYieldToHost function</figcaption>
 </figure>
 
 
 
-It checks whether we exceeded the deadline. What is the deadline? It is a currentTime + 5m, so it appears, React scheduler breaks the execution each
+It checks whether we exceeded the deadline. What is the deadline? It is a `currentTime + 5ms`, so it appears, React scheduler breaks the execution each
 5 ms, so the same, as presented in our example earlier in the article. There is [a descriptive comment in the source code](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L115-L119) presenting the way it works:
 
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/yield-interval.png" alt="fence">
-<figcaption>Fig 5. React's yieldInterval constant</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/yield-interval.png" alt="yieldInterval implementation">
+<figcaption>Fig 8. React's yieldInterval constant</figcaption>
 </figure>
 
 Ok, where is a code presenting MessageChannel loop?
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/perform-work-until-deadline.png" alt="fence">
-<figcaption>Fig 5. React's performWorkUntilDeadline function</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/perform-work-until-deadline.png" alt="performWorkUntilDeadline implementation">
+<figcaption>Fig 9. React's performWorkUntilDeadline function</figcaption>
 </figure>
 
 It’s a little bit more complicated, but at [the very bottom of the code listing](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L189-L226), we have a channel setup. You can briefly walk through the code comments to see the flow. Inside `performWorkUntilDeadline` there is `port.postMessage(null);` which keeps the message loop running.
@@ -229,8 +243,8 @@ Remember React 15.x app example which presents [scheduling problem](https://clau
 
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/react-stack.png" alt="fence">
-<figcaption>Fig 3. App structure</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/react-stack.png" alt="React 15.x heavy computation app">
+<figcaption>Fig 10. React 15.x heavy computation app</figcaption>
 </figure>
 
 [Here](https://claudiopro.github.io/react-fiber-vs-stack-demo/fiber.html) you can see the same app but powered with React 16.x and its new React Fiber approach. Way better, right?
@@ -240,8 +254,8 @@ Remember React 15.x app example which presents [scheduling problem](https://clau
 `shouldYield` is not the only API exposed to the internal use for React devs.
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/scheduler-api.png" alt="fence">
-<figcaption>Fig 3. Scheduler API</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/scheduler-api.png" alt="Scheduler API ">
+<figcaption>Fig 11. Scheduler API</figcaption>
 </figure>
 
 Considering the naming convention of [the exposed functions](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/src/Scheduler.js#L415-L434), we can conclude the module is still in development stage and API might change at the time.
@@ -291,7 +305,7 @@ useEffect(() => {
 
 Depending on the state of the component, React Reconciler module calls *mount* or *unmount* (i.e. while destroying component).
 
-To sum it up all *passive effect* hooks are being called *asynchronously* — after browser repaint. This is a different approach comparing to the old implementation of _componentDidMount_ or _componentDidUpdate_ which block the browser from repainting. It is also worth noticing, that we have no alternative for _componentWillMount_ or componentWillUpdate in hooks world. Those methods used to be a great place to introduce side-effects by developers (which might again — delay repainting) so that they decide to deprecate it.
+To sum it up all *passive effect* hooks are being called *asynchronously* — after browser repaint. This is a different approach comparing to the old implementation of _componentDidMount_ or _componentDidUpdate_ which block the browser from repainting. It is also worth noticing, that we have no alternative for _componentWillMount_ or _componentWillUpdate_ in hooks world. Those methods used to be a great place to introduce side-effects by developers (which might delay repaint process) so that they decide to deprecate it.
 
 So, all the code you put inside *passive effect* goes through the React Scheduler.
 
@@ -323,8 +337,8 @@ But why do I describe this thing here, in scheduler-based article? Well, the int
 
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/is-input-pending.png" alt="fence">
-<figcaption>Fig 3. React's isInputPending fallback implementation</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/is-input-pending.png" alt="isInputPending implementation">
+<figcaption>Fig 12. React's isInputPending fallback implementation</figcaption>
 </figure>
 
 After meeting specific requirements:
@@ -336,22 +350,21 @@ our React Scheduler module provides an improved version of `shouldYield` impleme
 
 # History of scheduling in React
 
-The problem with React 15.x was that the entire rendering process was being made synchronously. One, large, time-consuming, synchronous, and recursive (!) piece of code. This can not co-operate with other browser activities, right?
+The problem with React 15.x was that the entire rendering process was being made synchronously. One, large, time-consuming, synchronous, and recursive (!) piece of code. This can't co-operate with other browser activities, right?
 
-At the very beginning of React Fiber’s development (16.x), the React team was using `requestIdleCallback`. But, it appeared to be — as [Dan Abramov said](https://github.com/facebook/react/issues/11171#issuecomment-335431662) — not as aggressive as the team wanted to.
+At the very beginning of React Fiber’s development (v. 16.x), the React team was using `requestIdleCallback`. But, it appeared to be — as [Dan Abramov said](https://github.com/facebook/react/issues/11171#issuecomment-335431662) — not as aggressive as the team wanted to.
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/dan-said.png" alt="fence">
-<figcaption>Fig 3. Dan about requestIdleCallback</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/dan-said.png" alt="Dan's github post about requestIdleCallback">
+<figcaption>Fig 13. Dan about requestIdleCallback</figcaption>
 </figure>
 
 The next step was to simulate `requestIdleCallback` with `requestAnimationFrame`. They tried to guess frame size and align React render mechanism with vsync cycle. And it was ok, until the latest made (by Andrew Clark) which gets rid of `requestAnimationFrame`, as described [here](https://github.com/facebook/react/pull/16271)).
 
 # Summary
 
-As presented earlier, we have a couple of API which might be helpful, like `requestAnimationFrame`, `requestIdleCallback`, _message loop_ (MessageChannel), or even `setTimeout`.
+As presented earlier, we have a couple of API which might be helpful while trying to implement scheduling mechanism, like `requestAnimationFrame`, `requestIdleCallback`, _message loop_ (MessageChannel), or even `setTimeout`.
 
 But hey — there were designed for slightly different purposes, weren’t they?
 
 No doubt, the scheduling problem is on the table, some of the concepts have been announced lately within the browser vendor environments. If you are interested in the topic — I recommend [WICG/main-thread-scheduling](https://github.com/WICG/main-thread-scheduling) repo as well as its "[Further Reading](https://github.com/WICG/main-thread-scheduling#further-reading--viewing)" section.
-
