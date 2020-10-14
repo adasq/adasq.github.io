@@ -1,7 +1,7 @@
 # Site settings
 title: Adam Płócieniak # site title
 description: >- # site description
-  Writing about javascript / react...
+  Interested in javascript / reactjs
   More on <a href="https://github.com/adasq" target="_blank" rel="noopener">@github</a>.
 lang: en-US # default lang
 timezone: Asia/Jakarta # set your timezone
@@ -13,8 +13,7 @@ mode: dark # default theme "dark" | "light"
 author:
   name: Adam Płócieniak # author name
   bio: >- # tell to the world
-    Writing about javascript / react... 
-    More on <a href="https://github.com/adasq" target="_blank" rel="noopener">@github</a>.
+    Interested in javascript / reactjs
   username: adasq # general username
   github: adasq # github username
   #twitter: adasq3 # twitter username
