@@ -9,8 +9,8 @@ image: "/assets/img/scheduling-in-react-16-x/background.jpeg"
 # What is scheduler?
 
 <figure>
-<img src="/assets/img/scheduling-in-react-16-x/background.jpeg" alt="fence">
-<figcaption>Fig 1. Fence</figcaption>
+<img src="/assets/img/scheduling-in-react-16-x/background.jpeg" alt="queue">
+<figcaption>Fig 1. queue</figcaption>
 </figure>
 
 Let’s start with some theory.
