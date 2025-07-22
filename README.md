@@ -1,3 +1,3 @@
-# My blog
+# My personal blog
 
 https://adasq.github.io/
